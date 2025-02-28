@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        input {
+            padding: 8px;
+            margin-bottom: 10px;
+            width: 200px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        a {
+            margin-left: 10px;
+            text-decoration: none;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Management System</h1>
+    
+    <div>
+        <input type="text" id="firstName" placeholder="First Name">
+        <input type="text" id="lastName" placeholder="Last Name">
+        <button id="addUserBtn">ADD User</button>
+        <a href="/users">View Users</a>
+    </div>
+
+    <script>
+        document.getElementById('addUserBtn').addEventListener('click', async () => {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            
+            if (!firstName || !lastName) {
+                alert('Please enter both first name and last name');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/add-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ firstName, lastName })
+                });
+                
+                if (response.ok) {
+                    alert('User added successfully');
+                    document.getElementById('firstName').value = '';
+                    document.getElementById('lastName').value = '';
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.message);
+                }
+            } catch (error) {
+                alert('Error adding user');
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
