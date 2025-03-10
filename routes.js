@@ -9,6 +9,7 @@ const routes = {
 
         // Serve the homepage (GET /)
         if (url === '/' && method === 'GET') {
+            res.statusCode = 200;
             serveHomePage(req, res);
         }
         // Add a new user (POST /add-user)
@@ -43,12 +44,10 @@ function serveHomePage(req, res) {
 // Add a new user (POST /add-user)
 function addUser(req, res) {
     let body = '';
-
     // Collect the data from the POST request body
     req.on('data', chunk => {
         body += chunk.toString();
     });
-
     // Once the request body is fully received, process the data
     req.on('end', () => {
         try {
@@ -56,6 +55,16 @@ function addUser(req, res) {
             const { firstName, lastName } = userData;
 
             // Validate input (ensure both first and last names are provided)
+            if (firstName && !lastName) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: 'Last name is required if first name is provided' }));
+                return;
+            }
+            if (!firstName && lastName) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: 'First name is required if last name is provided' }));
+                return;
+            }
             if (!firstName || !lastName) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ message: 'First name and last name are required' }));
@@ -69,11 +78,6 @@ function addUser(req, res) {
                 return;
             }
 
-            if (firstName.length > 50 || lastName.length > 50) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ message: 'Names cannot exceed 50 characters' }));
-                return;
-            }
 
             // Check if the user already exists
             const usersData = utils.readUsersFromFile();
